@@ -1,0 +1,16 @@
+name: Notify
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: ${{ format('https://ancient-harbor-41036.herokuapp.com/pr?user={0}&repo={1}&pr={2}', 'CatadoresDeAnime', 'potential-rotary-phone', github.event.number) }}
+          method: 'GET'
+          preventFailureOnNoResponse: 'true'

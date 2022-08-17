@@ -1,0 +1,8 @@
+enum GamePhases {
+  WAITING_FOR_PLAYERS = 'WAITING_FOR_PLAYERS',
+  COUNTDOWN = 'COUNTDOWN',
+  RUNNING = 'RUNNING',
+  FINISHED = 'FINISHED',
+}
+
+export default GamePhases;

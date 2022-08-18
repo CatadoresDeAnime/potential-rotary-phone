@@ -1,6 +1,6 @@
 import {Server} from 'socket.io';
 import {createDefaultPlayer, createDefaultSession} from './utils';
-import {manageWaitingForPlayers} from '../src/server/gameFlowManagers';
+import {manageCountdown, manageWaitingForPlayers} from '../src/server/gameFlowManagers';
 import Config from '../src/server/Config';
 import GamePhases from '../src/server/GamePhases';
 
@@ -43,5 +43,43 @@ describe('manageWaitingForPlayers', () => {
     ];
     manageWaitingForPlayers(server, session);
     expect(session.currentPhase).toBe(GamePhases.COUNTDOWN);
+  });
+});
+
+describe('manageCountdown', () => {
+  let server: Server;
+
+  beforeAll(() => {
+    server = new Server(3000);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('startCountdown', () => {
+    const session = createDefaultSession();
+    manageCountdown(server, session);
+
+    expect(session.countdownInfo.lastCountSentAt).not.toBe(0);
+  });
+
+  test('count', () => {
+    const count = 5;
+    const session = createDefaultSession();
+    session.countdownInfo.lastCountSentAt = Date.now() - 2000;
+    session.countdownInfo.currentCount = count;
+    manageCountdown(server, session);
+
+    expect(session.countdownInfo.currentCount).toBe(count - 1);
+  });
+
+  test('finishCount', () => {
+    const session = createDefaultSession();
+    session.countdownInfo.currentCount = 0;
+    session.countdownInfo.lastCountSentAt = Date.now();
+    manageCountdown(server, session);
+
+    expect(session.currentPhase).toBe(GamePhases.RUNNING);
   });
 });

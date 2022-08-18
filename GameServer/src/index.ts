@@ -5,7 +5,7 @@ import GamePhases from './server/GamePhases';
 import {baseHandler, onPlayerJoined} from './server/handlers';
 import logger from './utils/logger';
 import Config from './server/Config';
-import {manageWaitingForPlayers} from './server/gameFlowManagers';
+import {manageCountdown, manageGameCreated, manageWaitingForPlayers} from './server/gameFlowManagers';
 import argv from './utils/args';
 
 const port = Number(argv.port);
@@ -16,9 +16,13 @@ const session = {
     firstPlayerConnectedAt: 0,
     sessionStartedAt: Date.now(),
   },
+  countdownInfo: {
+    currentCount: 6,
+    lastCountSentAt: 0,
+  },
   expectedPlayersTokens: new Set(tokenList.split(',')),
   currentPlayers: [],
-  currentPhase: GamePhases.WAITING_FOR_PLAYERS,
+  currentPhase: GamePhases.GAME_CREATED,
 };
 
 server.on('connection', (socket) => {
@@ -40,8 +44,14 @@ server.on('connection', (socket) => {
 
 setInterval(() => {
   switch (session.currentPhase) {
+    case GamePhases.GAME_CREATED:
+      manageGameCreated(server, session);
+      break;
     case GamePhases.WAITING_FOR_PLAYERS:
       manageWaitingForPlayers(server, session);
+      break;
+    case GamePhases.COUNTDOWN:
+      manageCountdown(server, session);
       break;
     default:
       break;

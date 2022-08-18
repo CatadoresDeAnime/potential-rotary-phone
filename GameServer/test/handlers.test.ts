@@ -38,7 +38,7 @@ describe('baseHandler', () => {
   });
   test('rejectEvent', () => {
     const session = createDefaultSession();
-    session.currentPhase = GamePhases.COUNTDOWN;
+    session.currentPhase = GamePhases.FINISHED;
     const onResponse = (result: boolean) => {
       expect(result).toBe(false);
     };

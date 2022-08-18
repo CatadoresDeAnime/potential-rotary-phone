@@ -7,6 +7,10 @@ export function createDefaultSession(): SessionContext {
       firstPlayerConnectedAt: 0,
       sessionStartedAt: Date.now(),
     },
+    countdownInfo: {
+      currentCount: 5,
+      lastCountSentAt: 0,
+    },
     expectedPlayersTokens: new Set([
       'tokenPlayer1',
       'tokenPlayer2',

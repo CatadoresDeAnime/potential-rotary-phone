@@ -13,6 +13,9 @@ socket.on('connect', () => {
   const player = {
     token: argv.token,
   };
+  socket.on(Events.COUNTDOWN, (count) => {
+    clientLogger.info(`Countdown: ${count}`);
+  });
 
   socket.emit(
     Events.PLAYER_JOINED,

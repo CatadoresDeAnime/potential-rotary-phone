@@ -1,5 +1,5 @@
 import {createLogger, format, transports} from 'winston';
-import 'dotenv/config';
+import 'dotenv';
 
 const [dateString] = new Date().toISOString().split('T');
 
@@ -18,7 +18,7 @@ const logger = createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== 'PRODUCTION') {
+if (process.env.nodeEnv !== 'PRODUCTION') {
   logger.add(new transports.Console({
     format: format.combine(
       format.colorize(),

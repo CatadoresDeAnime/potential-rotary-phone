@@ -1,17 +1,17 @@
 import {io} from 'socket.io-client';
-import 'dotenv/config';
-import logger from '../utils/logger';
 import Events from '../server/Events';
 import ErrorCodes from '../server/ErrorCodes';
+import argv from './argsClient';
+import clientLogger from '../utils/clientLogger';
 
-const host = process.env.HOST;
-const port = process.env.PORT;
+const {host} = argv;
+const {port} = argv;
 const socket = io(`${host}:${port}`);
 
 socket.on('connect', () => {
-  logger.info('Client connected');
+  clientLogger.info('Client connected');
   const player = {
-    token: 'tokenPlayer1',
+    token: argv.token,
   };
 
   socket.emit(
@@ -19,9 +19,9 @@ socket.on('connect', () => {
     player,
     (result: boolean, errorCode: ErrorCodes, message: string) => {
       if (result) {
-        logger.info('Player added to match');
+        clientLogger.info('Player added to match');
       } else {
-        logger.error({
+        clientLogger.error({
           message: 'Player not added to match',
           errorCode,
           errorDescription: message,

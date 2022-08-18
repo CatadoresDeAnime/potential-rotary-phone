@@ -2,8 +2,7 @@ import {Socket} from 'socket.io';
 import logger from '../utils/logger';
 import ErrorCodes from './ErrorCodes';
 import Events from './Events';
-import GamePhases from './GamePhases';
-import {Player} from './types';
+import {Player, SessionContext} from './types';
 import {validateEventOnGamePhase} from './validations';
 
 type EventData = Player;
@@ -15,31 +14,28 @@ interface IOnResponse {
 interface HandlerContext {
   socket: Socket,
   data: EventData,
-  expectedPlayersTokens: Set<string>,
-  currentPlayers: Player[],
   onResponse: IOnResponse,
+  session: SessionContext,
 }
 
 interface BaseHandlerContext {
   socket: Socket,
   eventTag: Events,
-  currentPhase: GamePhases,
   data: EventData,
-  expectedPlayersTokens: Set<string>,
-  currentPlayers: Player[],
   onResponse: IOnResponse,
   handler: (ctx: HandlerContext) => void,
+  session: SessionContext,
 }
 
 export function baseHandler({
-  eventTag, currentPhase, data, expectedPlayersTokens, currentPlayers, onResponse, handler, socket,
+  eventTag, data, session, onResponse, handler, socket,
 }: BaseHandlerContext) {
-  if (validateEventOnGamePhase(eventTag, currentPhase)) {
+  if (validateEventOnGamePhase(eventTag, session.currentPhase)) {
     handler({
-      data, expectedPlayersTokens, currentPlayers, onResponse, socket,
+      data, session, onResponse, socket,
     });
   } else {
-    const message = `Current game phase: ${currentPhase}`;
+    const message = `Current game phase: ${session.currentPhase}`;
     logger.info({
       message: 'Event ignored',
       connectionId: socket.id,
@@ -52,11 +48,17 @@ export function baseHandler({
 }
 
 export function onPlayerJoined({
-  data, expectedPlayersTokens, currentPlayers, onResponse, socket,
+  data, session, onResponse, socket,
 }: HandlerContext) {
   const player = data;
-  if (expectedPlayersTokens.has(player.token)) {
-    currentPlayers.push(player);
+  const sessionCtx = session;
+  if (sessionCtx.expectedPlayersTokens.has(player.token)) {
+    if (sessionCtx.currentPlayers.length === 0) {
+      sessionCtx.waitingForPlayersInfo.firstPlayerConnectedAt = Date.now();
+    }
+    sessionCtx.currentPlayers = session
+      .currentPlayers.filter((currPlayer) => currPlayer.token !== player.token);
+    sessionCtx.currentPlayers.push(player);
     logger.info({
       message: 'Player joined',
       connectionId: socket.id,
@@ -73,5 +75,6 @@ export function onPlayerJoined({
       errorDescription: message,
     });
     onResponse(false, ErrorCodes.UNAUTHORIZED, message);
+    socket.disconnect();
   }
 }

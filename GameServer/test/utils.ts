@@ -1,5 +1,7 @@
 import GamePhases from '../src/server/GamePhases';
-import {Player, SessionContext} from '../src/server/types';
+import {Player} from '../src/server/types';
+import SessionContext from '../src/server/session';
+import GameHandler from '../src/game/GameHandler';
 
 export function createDefaultSession(): SessionContext {
   return {
@@ -19,11 +21,13 @@ export function createDefaultSession(): SessionContext {
     ]),
     currentPlayers: [],
     currentPhase: GamePhases.WAITING_FOR_PLAYERS,
+    gameHandler: new GameHandler(),
   };
 }
 
 export function createDefaultPlayer(id = 1): Player {
   return {
     token: `tokenPlayer${id}`,
+    name: 'player',
   };
 }

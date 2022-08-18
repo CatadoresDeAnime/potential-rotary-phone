@@ -3,7 +3,7 @@ import logger from '../utils/logger';
 import Config from './Config';
 import Events from './Events';
 import GamePhases from './GamePhases';
-import {SessionContext} from './types';
+import SessionContext from './session';
 
 export function manageGameCreated(server: Server, session: SessionContext) {
   logger.info('Session created...');
@@ -44,7 +44,8 @@ export function manageCountdown(server: Server, session: SessionContext) {
       sessionCtx.countdownInfo.lastCountSentAt = Date.now();
     }
   } else {
-    sessionCtx.currentPhase = GamePhases.RUNNING;
     logger.info('Starting game...');
+    sessionCtx.currentPhase = GamePhases.RUNNING;
+    sessionCtx.gameHandler.start();
   }
 }

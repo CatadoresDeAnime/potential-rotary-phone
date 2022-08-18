@@ -2,23 +2,24 @@ import {Socket} from 'socket.io';
 import logger from '../utils/logger';
 import ErrorCodes from './ErrorCodes';
 import Events from './Events';
-import {Player, SessionContext} from './types';
+import {Player} from './types';
+import SessionContext from './session';
 import {validateEventOnGamePhase} from './validations';
 
 type EventData = Player;
 
-interface IOnResponse {
+export interface IOnResponse {
   (result: boolean, errorCode: ErrorCodes, description: string): void;
 }
 
-interface HandlerContext {
+export interface HandlerContext {
   socket: Socket,
   data: EventData,
   onResponse: IOnResponse,
   session: SessionContext,
 }
 
-interface BaseHandlerContext {
+export interface BaseHandlerContext {
   socket: Socket,
   eventTag: Events,
   data: EventData,
@@ -57,7 +58,24 @@ export function onPlayerJoined({
       sessionCtx.waitingForPlayersInfo.firstPlayerConnectedAt = Date.now();
     }
     sessionCtx.currentPlayers = session
-      .currentPlayers.filter((currPlayer) => currPlayer.token !== player.token);
+      .currentPlayers.filter((currPlayer: Player) => currPlayer.token !== player.token);
+    if (player.id === undefined) {
+      player.id = sessionCtx.gameHandler.addPlayer(player);
+      player.connectionId = socket.id;
+      if (player.id === -1) {
+        const errorDescription = 'Game is already full';
+        logger.error({
+          message: 'Failed to join player to match',
+          connectionId: socket.id,
+          player,
+          errorCode: ErrorCodes.PLAYER_NOT_JOINED,
+          errorDescription,
+        });
+        onResponse(false, ErrorCodes.PLAYER_NOT_JOINED, errorDescription);
+        socket.disconnect();
+        return;
+      }
+    }
     sessionCtx.currentPlayers.push(player);
     logger.info({
       message: 'Player joined',
@@ -65,6 +83,7 @@ export function onPlayerJoined({
       player,
     });
     onResponse(true, ErrorCodes.OK, 'Joined game');
+    socket.emit(Events.CONNECTION_ACCEPTED, player.id);
   } else {
     const message = 'Invalid token';
     logger.info({

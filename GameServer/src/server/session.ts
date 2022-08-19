@@ -2,23 +2,23 @@ import GameHandler from '../game/GameHandler';
 import GamePhases from './GamePhases';
 import {Player} from './types';
 
-interface WaitingForPlayers {
+interface IWaitingForPlayers {
   firstPlayerConnectedAt: number;
   sessionStartedAt: number;
 }
 
-interface CountdownInfo{
+interface ICountdownInfo{
   currentCount: number;
   lastCountSentAt: number;
 }
 
-interface SessionContext {
-  waitingForPlayersInfo: WaitingForPlayers;
-  countdownInfo: CountdownInfo;
+interface ISessionContext {
+  waitingForPlayersInfo: IWaitingForPlayers;
+  countdownInfo: ICountdownInfo;
   expectedPlayersTokens: Set<string>;
   currentPlayers: Player[];
   currentPhase: GamePhases;
   gameHandler: GameHandler;
 }
 
-export default SessionContext;
+export default ISessionContext;

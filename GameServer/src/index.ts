@@ -7,6 +7,7 @@ import logger from './utils/logger';
 import Config from './server/Config';
 import {manageCountdown, manageGameCreated, manageWaitingForPlayers} from './server/gameFlowManagers';
 import argv from './utils/args';
+import GameHandler from './game/GameHandler';
 
 const port = Number(argv.port);
 const server = new Server(port);
@@ -23,6 +24,7 @@ const session = {
   expectedPlayersTokens: new Set(tokenList.split(',')),
   currentPlayers: [],
   currentPhase: GamePhases.GAME_CREATED,
+  gameHandler: new GameHandler(),
 };
 
 server.on('connection', (socket) => {

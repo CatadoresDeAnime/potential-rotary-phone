@@ -1,5 +1,5 @@
 import GamePhases from '../src/server/GamePhases';
-import {Player} from '../src/server/types';
+import {IPlayer} from '../src/server/types';
 import SessionContext from '../src/server/session';
 import GameHandler from '../src/game/GameHandler';
 
@@ -25,9 +25,10 @@ export function createDefaultSession(): SessionContext {
   };
 }
 
-export function createDefaultPlayer(id = 1): Player {
+export function createDefaultPlayer(id = 1): IPlayer {
   return {
     token: `tokenPlayer${id}`,
     name: 'player',
+    connectionId: 'id123',
   };
 }

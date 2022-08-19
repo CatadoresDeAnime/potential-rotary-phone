@@ -4,7 +4,7 @@ import {EnqueuedEvent} from '@danielmontes/darkness/build/game/Event';
 import Player from '@danielmontes/darkness/build/game/Player';
 import {GamePhase} from '@danielmontes/darkness/build/game/types';
 import createBehaviourTree from '@danielmontes/darkness/build/game/bot/BehaviourTreeFactoty';
-import {Player as IPlayer} from '../server/types';
+import {IPlayer} from '../server/types';
 
 type Behavior = 'atack' | 'defense' | 'random';
 
@@ -60,7 +60,7 @@ export default class GameHandler {
       const tree = createBehaviourTree(getRandomBehavior());
       tree.bind(this.game, id);
       this.behaviorTrees.push(tree);
-      this.addPlayer({name: `bot ${id}`, token: ''});
+      this.addPlayer({name: `bot ${id}`, token: '', connectionId: ''});
     }
   }
 }

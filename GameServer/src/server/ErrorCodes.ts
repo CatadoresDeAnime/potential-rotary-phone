@@ -3,6 +3,7 @@ enum ErrorCodes {
   EVENT_IGNORED,
   UNAUTHORIZED,
   PLAYER_NOT_JOINED,
+  MISSING_DATA,
 }
 
 export default ErrorCodes;

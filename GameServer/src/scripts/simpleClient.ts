@@ -12,7 +12,11 @@ socket.on('connect', () => {
   clientLogger.info('Client connected');
   const player = {
     token: argv.token,
+    name: `player-${argv.token}`,
   };
+  socket.on(Events.CONNECTION_ACCEPTED, (id) => {
+    clientLogger.info(`Joined game with id: ${id}`);
+  });
   socket.on(Events.COUNTDOWN, (count) => {
     clientLogger.info(`Countdown: ${count}`);
   });

@@ -1,6 +1,6 @@
 import MockedSocket from 'socket.io-mock';
 import {Socket} from 'socket.io';
-import {baseHandler, HandlerContext, onPlayerJoined} from '../src/server/handlers';
+import {baseHandler, IHandlerContext, onPlayerJoined} from '../src/server/handlers';
 import Events from '../src/server/Events';
 import {createDefaultPlayer, createDefaultSession} from './utils';
 import GamePhases from '../src/server/GamePhases';
@@ -29,7 +29,7 @@ describe('baseHandler', () => {
     const onResponse = (result: boolean) => {
       expect(result).toBe(true);
     };
-    const handler = (ctx: HandlerContext) => {
+    const handler = (ctx: IHandlerContext) => {
       ctx.onResponse(true, ErrorCodes.OK, '');
     };
     baseHandler({
@@ -86,7 +86,8 @@ describe('onPlayerJoined', () => {
       session,
       onResponse,
     });
-    expect(session.currentPlayers).toContainEqual(player);
+    const foundItems = session.currentPlayers.filter((item) => item.token === token);
+    expect(foundItems).toHaveLength(1);
   });
 
   test('rejectPlayer', () => {
@@ -116,7 +117,7 @@ describe('onPlayerJoined', () => {
     const expectedPlayersTokens = new Set([token]);
     session.expectedPlayersTokens = expectedPlayersTokens;
     for (let i = 0; i < 4; i++) {
-      session.gameHandler.addPlayer({token: '', name: ''});
+      session.gameHandler.addPlayer(createDefaultPlayer());
     }
     const onResponse = (result: boolean, code: ErrorCodes) => {
       expect(result).toBe(false);
@@ -129,5 +130,48 @@ describe('onPlayerJoined', () => {
       onResponse,
     });
     expect(session.currentPlayers).toHaveLength(0);
+  });
+
+  test('rejectPlayer - missingData', () => {
+    const session = createDefaultSession();
+    const token = 'token123';
+    const expectedPlayersTokens = new Set([token]);
+    session.expectedPlayersTokens = expectedPlayersTokens;
+    const onResponse = (result: boolean, code: ErrorCodes) => {
+      expect(result).toBe(false);
+      expect(code).toBe(ErrorCodes.MISSING_DATA);
+    };
+    onPlayerJoined({
+      socket,
+      data: {},
+      session,
+      onResponse,
+    });
+    expect(session.currentPlayers).toHaveLength(0);
+  });
+
+  test('acceptPlayer - reconnect', () => {
+    const session = createDefaultSession();
+    const token = 'token123';
+    const player = createDefaultPlayer();
+    player.token = token;
+    const expectedPlayersTokens = new Set([token]);
+    session.expectedPlayersTokens = expectedPlayersTokens;
+    const onResponse = (result: boolean) => {
+      expect(result).toBe(true);
+    };
+    onPlayerJoined({
+      socket,
+      data: player,
+      session,
+      onResponse,
+    });
+    onPlayerJoined({
+      socket,
+      data: player,
+      session,
+      onResponse,
+    });
+    expect(session.currentPlayers).toHaveLength(1);
   });
 });

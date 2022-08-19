@@ -1,18 +1,19 @@
 import {Server} from 'socket.io';
+import {GameRunningPhase} from '../game/gameState';
 import logger from '../utils/logger';
 import Config from './Config';
 import Events from './Events';
 import GamePhases from './GamePhases';
-import SessionContext from './session';
+import ISessionContext from './session';
 
-export function manageGameCreated(server: Server, session: SessionContext) {
+export function manageGameCreated(server: Server, session: ISessionContext) {
   logger.info('Session created...');
   logger.info('Server started...');
   const sessionCtx = session;
   sessionCtx.currentPhase = GamePhases.WAITING_FOR_PLAYERS;
 }
 
-export function manageWaitingForPlayers(server: Server, session: SessionContext) {
+export function manageWaitingForPlayers(server: Server, session: ISessionContext) {
   const sessionCtx = session;
   if (sessionCtx.currentPlayers.length === sessionCtx.expectedPlayersTokens.size) {
     logger.info('Countdown started...');
@@ -32,7 +33,7 @@ export function manageWaitingForPlayers(server: Server, session: SessionContext)
   }
 }
 
-export function manageCountdown(server: Server, session: SessionContext) {
+export function manageCountdown(server: Server, session: ISessionContext) {
   const sessionCtx = session;
   if (sessionCtx.countdownInfo.lastCountSentAt === 0) {
     sessionCtx.countdownInfo.lastCountSentAt = Date.now();
@@ -47,5 +48,16 @@ export function manageCountdown(server: Server, session: SessionContext) {
     logger.info('Starting game...');
     sessionCtx.currentPhase = GamePhases.RUNNING;
     sessionCtx.gameHandler.start();
+  }
+}
+
+export function manageGameRunning(server: Server, session: ISessionContext) {
+  const gameState = session.gameHandler.getState();
+  const sessionCtx = session;
+  if (gameState.gameInfo.phase === GameRunningPhase.FINISHED) {
+    sessionCtx.currentPhase = GamePhases.FINISHED;
+  } else {
+    sessionCtx.gameHandler.update();
+    server.emit(Events.STATE_UPDATE, gameState);
   }
 }

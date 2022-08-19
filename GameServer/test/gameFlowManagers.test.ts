@@ -1,8 +1,9 @@
 import {Server} from 'socket.io';
 import {createDefaultPlayer, createDefaultSession} from './utils';
-import {manageCountdown, manageWaitingForPlayers} from '../src/server/gameFlowManagers';
+import {manageCountdown, manageGameRunning, manageWaitingForPlayers} from '../src/server/gameFlowManagers';
 import Config from '../src/server/Config';
 import GamePhases from '../src/server/GamePhases';
+import {GameRunningPhase} from '../src/game/gameState';
 
 jest.mock('socket.io');
 
@@ -81,5 +82,26 @@ describe('manageCountdown', () => {
     manageCountdown(server, session);
 
     expect(session.currentPhase).toBe(GamePhases.RUNNING);
+  });
+});
+
+describe('manageGameRunning', () => {
+  let server: Server;
+
+  beforeAll(() => {
+    server = new Server(3000);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('finishGame', () => {
+    const session = createDefaultSession();
+    session.gameHandler.fillPlayersWithBots();
+    session.gameHandler.game.phase = GameRunningPhase.FINISHED;
+    manageGameRunning(server, session);
+
+    expect(session.currentPhase).toBe(GamePhases.FINISHED);
   });
 });

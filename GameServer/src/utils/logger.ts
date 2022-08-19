@@ -1,5 +1,5 @@
 import {createLogger, format, transports} from 'winston';
-import 'dotenv';
+import 'dotenv/config';
 
 const [dateString] = new Date().toISOString().split('T');
 

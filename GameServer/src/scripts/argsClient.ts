@@ -8,6 +8,10 @@ const argv = yargs(hideBin(process.argv))
     port: {default: 3000},
     nodeEnv: {default: 'DEVELOPMENT'},
     token: {type: 'string'},
+    stateLogRate: {default: 3000},
+    logCompleteState: {default: false},
+    sendEventsRate: {default: 1000},
+    sendBadEvents: {default: true},
   })
   .check((args) => {
     if (args.token === undefined) {

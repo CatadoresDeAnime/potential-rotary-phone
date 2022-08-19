@@ -2,6 +2,8 @@ import GamePhases from '../src/server/GamePhases';
 import {IPlayer} from '../src/server/types';
 import SessionContext from '../src/server/session';
 import GameHandler from '../src/game/GameHandler';
+import {IEnqueuedGameEvent} from '../src/server/handlers';
+import {GameEventCode} from '../src/game/gameState';
 
 export function createDefaultSession(): SessionContext {
   return {
@@ -28,7 +30,14 @@ export function createDefaultSession(): SessionContext {
 export function createDefaultPlayer(id = 1): IPlayer {
   return {
     token: `tokenPlayer${id}`,
-    name: 'player',
-    connectionId: 'id123',
+    name: `player-${id}`,
+    connectionId: `id-${id}`,
+  };
+}
+
+export function createDefaultEnqueuedGameEvent(): IEnqueuedGameEvent {
+  return {
+    code: GameEventCode.RELEASED_PIECE,
+    playerId: 0,
   };
 }

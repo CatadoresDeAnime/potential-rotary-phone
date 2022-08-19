@@ -1,6 +1,6 @@
 import GameHandler from '../game/GameHandler';
 import GamePhases from './GamePhases';
-import {Player} from './types';
+import {IPlayer} from './types';
 
 interface IWaitingForPlayers {
   firstPlayerConnectedAt: number;
@@ -16,7 +16,7 @@ interface ISessionContext {
   waitingForPlayersInfo: IWaitingForPlayers;
   countdownInfo: ICountdownInfo;
   expectedPlayersTokens: Set<string>;
-  currentPlayers: Player[];
+  currentPlayers: IPlayer[];
   currentPhase: GamePhases;
   gameHandler: GameHandler;
 }

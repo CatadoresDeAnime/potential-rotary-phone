@@ -1,11 +1,12 @@
 import {Server} from 'socket.io';
-import 'dotenv/config';
 import Events from './server/Events';
 import GamePhases from './server/GamePhases';
-import {baseHandler, onPlayerJoined} from './server/handlers';
+import {baseHandler, onPlayerJoined, onPlayerSentGameEvent} from './server/handlers';
 import logger from './utils/logger';
 import Config from './server/Config';
-import {manageCountdown, manageGameCreated, manageWaitingForPlayers} from './server/gameFlowManagers';
+import {
+  manageCountdown, manageGameCreated, manageGameRunning, manageWaitingForPlayers,
+} from './server/gameFlowManagers';
 import argv from './utils/args';
 import GameHandler from './game/GameHandler';
 
@@ -37,9 +38,25 @@ server.on('connection', (socket) => {
       socket,
       eventTag: Events.PLAYER_JOINED,
       session,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       onResponse,
       handler: onPlayerJoined,
+    });
+  });
+  socket.on(Events.GAME_EVENT, (event, onResponse) => {
+    baseHandler({
+      socket,
+      eventTag: Events.GAME_EVENT,
+      session,
+      data: {
+        eventCode: Events.GAME_EVENT,
+        ...event,
+      },
+      onResponse,
+      handler: onPlayerSentGameEvent,
     });
   });
 });
@@ -54,6 +71,9 @@ setInterval(() => {
       break;
     case GamePhases.COUNTDOWN:
       manageCountdown(server, session);
+      break;
+    case GamePhases.RUNNING:
+      manageGameRunning(server, session);
       break;
     default:
       break;

@@ -1,8 +1,10 @@
 import MockedSocket from 'socket.io-mock';
 import {Socket} from 'socket.io';
-import {baseHandler, IHandlerContext, onPlayerJoined} from '../src/server/handlers';
+import {
+  baseHandler, IHandlerContext, onPlayerJoined, onPlayerSentGameEvent,
+} from '../src/server/handlers';
 import Events from '../src/server/Events';
-import {createDefaultPlayer, createDefaultSession} from './utils';
+import {createDefaultEnqueuedGameEvent, createDefaultPlayer, createDefaultSession} from './utils';
 import GamePhases from '../src/server/GamePhases';
 import ErrorCodes from '../src/server/ErrorCodes';
 
@@ -82,7 +84,10 @@ describe('onPlayerJoined', () => {
     };
     onPlayerJoined({
       socket,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       session,
       onResponse,
     });
@@ -102,7 +107,10 @@ describe('onPlayerJoined', () => {
     };
     onPlayerJoined({
       socket,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       session,
       onResponse,
     });
@@ -125,7 +133,10 @@ describe('onPlayerJoined', () => {
     };
     onPlayerJoined({
       socket,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       session,
       onResponse,
     });
@@ -162,16 +173,64 @@ describe('onPlayerJoined', () => {
     };
     onPlayerJoined({
       socket,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       session,
       onResponse,
     });
     onPlayerJoined({
       socket,
-      data: player,
+      data: {
+        eventCode: Events.PLAYER_JOINED,
+        ...player,
+      },
       session,
       onResponse,
     });
     expect(session.currentPlayers).toHaveLength(1);
+  });
+});
+
+describe('onPlayerSentGameEvent', () => {
+  let socket: Socket;
+
+  beforeEach(() => {
+    socket = new MockedSocket();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('addEvent', () => {
+    const event = createDefaultEnqueuedGameEvent();
+    const session = createDefaultSession();
+    const onResponse = (result: boolean) => {
+      expect(result).toBe(true);
+    };
+    onPlayerSentGameEvent({
+      data: {
+        eventCode: Events.GAME_EVENT,
+        ...event,
+      },
+      session,
+      socket,
+      onResponse,
+    });
+  });
+
+  test('missingData', () => {
+    const session = createDefaultSession();
+    const onResponse = (result: boolean) => {
+      expect(result).toBe(false);
+    };
+    onPlayerSentGameEvent({
+      data: {},
+      session,
+      socket,
+      onResponse,
+    });
   });
 });

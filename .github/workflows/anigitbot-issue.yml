@@ -1,0 +1,17 @@
+name: Notify
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: ${{ format('https://ancient-harbor-41036.herokuapp.com/issue?user={0}&repo={1}&issue={2}', 'CatadoresDeAnime', 'potential-rotary-phone', github.event.issue.number) }}
+          method: 'GET'
+          preventFailureOnNoResponse: 'true'

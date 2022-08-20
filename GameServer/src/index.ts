@@ -5,7 +5,11 @@ import {baseHandler, onPlayerJoined, onPlayerSentGameEvent} from './server/handl
 import logger from './utils/logger';
 import Config from './server/Config';
 import {
-  manageCountdown, manageGameCreated, manageGameRunning, manageWaitingForPlayers,
+  manageCountdown,
+  manageGameCreated,
+  manageGameFinished,
+  manageGameRunning,
+  manageWaitingForPlayers,
 } from './server/gameFlowManagers';
 import argv from './utils/args';
 import GameHandler from './game/GameHandler';
@@ -74,6 +78,10 @@ setInterval(() => {
       break;
     case GamePhases.RUNNING:
       manageGameRunning(server, session);
+      break;
+    case GamePhases.FINISHED:
+      manageGameFinished(server, session);
+      process.exit();
       break;
     default:
       break;

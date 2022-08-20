@@ -4,6 +4,7 @@ import logger from '../utils/logger';
 import Config from './Config';
 import Events from './Events';
 import GamePhases from './GamePhases';
+import sendGameStatics from './sendGameStatics';
 import ISessionContext from './session';
 
 export function manageGameCreated(server: Server, session: ISessionContext) {
@@ -60,4 +61,9 @@ export function manageGameRunning(server: Server, session: ISessionContext) {
     sessionCtx.gameHandler.update();
     server.emit(Events.STATE_UPDATE, gameState);
   }
+}
+
+export function manageGameFinished(server: Server, session: ISessionContext) {
+  sendGameStatics();
+  server.emit(Events.GAME_FINISHED);
 }

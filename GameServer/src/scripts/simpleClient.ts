@@ -39,6 +39,11 @@ socket.on('connect', () => {
     }
   });
 
+  socket.on(Events.GAME_FINISHED, () => {
+    clientLogger.info('Game finished');
+    process.exit();
+  });
+
   socket.emit(
     Events.PLAYER_JOINED,
     player,

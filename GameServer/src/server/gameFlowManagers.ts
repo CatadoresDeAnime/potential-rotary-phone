@@ -59,7 +59,9 @@ export function manageGameRunning(server: Server, session: ISessionContext) {
     sessionCtx.currentPhase = GamePhases.FINISHED;
   } else {
     sessionCtx.gameHandler.update();
-    server.emit(Events.STATE_UPDATE, gameState);
+    if (Config.shouldEmitStateUpdates) {
+      server.emit(Events.STATE_UPDATE, gameState);
+    }
   }
 }
 

@@ -9,6 +9,8 @@ export function validateEventOnGamePhase(eventTag: Events, currentPhase: GamePha
       return currentPhase !== GamePhases.FINISHED;
     case Events.GAME_EVENT:
       return currentPhase === GamePhases.RUNNING;
+    case Events.GET_STATE_REQUEST:
+      return currentPhase !== GamePhases.GAME_CREATED && currentPhase !== GamePhases.COUNTDOWN;
     default:
       return false;
   }

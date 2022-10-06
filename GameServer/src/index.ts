@@ -1,7 +1,9 @@
 import {Server} from 'socket.io';
 import Events from './server/Events';
 import GamePhases from './server/GamePhases';
-import {baseHandler, onPlayerJoined, onPlayerSentGameEvent} from './server/handlers';
+import {
+  baseHandler, onPlayerJoined, onPlayerSentGameEvent, onGetStateRequest,
+} from './server/handlers';
 import logger from './utils/logger';
 import Config from './server/Config';
 import {
@@ -15,7 +17,7 @@ import argv from './utils/args';
 import GameHandler from './game/GameHandler';
 
 const port = Number(argv.port);
-const server = new Server(port);
+const server = new Server(port, {pingInterval: 500, pingTimeout: 1000});
 const tokenList = argv.tokens || '';
 const session = {
   waitingForPlayersInfo: {
@@ -61,6 +63,16 @@ server.on('connection', (socket) => {
       },
       onResponse,
       handler: onPlayerSentGameEvent,
+    });
+  });
+  socket.on(Events.GET_STATE_REQUEST, (onResponse) => {
+    baseHandler({
+      socket,
+      eventTag: Events.GET_STATE_REQUEST,
+      session,
+      data: {},
+      onResponse,
+      handler: onGetStateRequest,
     });
   });
 });

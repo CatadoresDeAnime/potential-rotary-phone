@@ -174,3 +174,8 @@ export function onPlayerSentGameEvent({
     onResponse(false, ErrorCodes.MISSING_DATA, errorDescription);
   }
 }
+
+export function onGetStateRequest({session, socket, onResponse}: IHandlerContext) {
+  socket.emit(Events.STATE_UPDATE, session.gameHandler.getState());
+  onResponse(true, ErrorCodes.OK, '');
+}
